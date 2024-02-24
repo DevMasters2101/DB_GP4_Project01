@@ -7,12 +7,17 @@
 #include "InputActionValue.h"
 #include "GP4_P01_ClimbingCharacter.generated.h"
 
+class UCustomMovementComponent;
 
 UCLASS(config=Game)
 class AGP4_P01_ClimbingCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+public:
+	AGP4_P01_ClimbingCharacter(const FObjectInitializer& ObjectInitializer);
+
+private:
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
@@ -20,7 +25,10 @@ class AGP4_P01_ClimbingCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
-	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	UCustomMovementComponent* CustomMovementComponent;
+
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* DefaultMappingContext;
@@ -33,22 +41,20 @@ class AGP4_P01_ClimbingCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* MoveAction;
 
+	/** Called for movement input */
+	void Move(const FInputActionValue& Value);
+
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 
-public:
-	AGP4_P01_ClimbingCharacter();
-	
-
-protected:
-
-	/** Called for movement input */
-	void Move(const FInputActionValue& Value);
-
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* ClimbAction;
 			
+	void OnClimbActionStarted(const FInputActionValue& Value);
 
 protected:
 	// APawn interface
@@ -62,5 +68,7 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	FORCEINLINE UCustomMovementComponent* GetCustomMovementComponent() const { return CustomMovementComponent; }
 };
 
