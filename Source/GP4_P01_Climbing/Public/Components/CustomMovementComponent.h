@@ -6,6 +6,15 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "CustomMovementComponent.generated.h"
 
+UENUM(BlueprintType)
+namespace ECustomMovementMode
+{
+	enum Type
+	{
+		MOVE_Climb UMETA(DisplayName = "Climb Mode")
+	};
+}
+
 /**
  * 
  */
@@ -14,27 +23,38 @@ class GP4_P01_CLIMBING_API UCustomMovementComponent : public UCharacterMovementC
 {
 	GENERATED_BODY()
 
-public:
+protected:
 	
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
+	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
 private:
 
 #pragma region ClimbTraces
 
-	TArray<FHitResult> DoCapsuleTraceMultiByObject(const FVector& Start, const FVector& End, bool bShowDebugShape = false);
-	FHitResult DoLineTraceSingleByObject(const FVector& Start, const FVector& End, bool bShowDebugShape = false);
+	TArray<FHitResult> DoCapsuleTraceMultiByObject(const FVector& Start, const FVector& End, bool bShowDebugShape = false, bool bDrawPersistantShapes = false);
+	FHitResult DoLineTraceSingleByObject(const FVector& Start, const FVector& End, bool bShowDebugShape = false, bool bDrawPersistantShapes = false);
 
 #pragma endregion
 
 #pragma region ClimbCore
 
-	void TraceClimbableSurfaces();
-	void TraceFromEyeHieght(float TraceDistance, float TraceStartOffset = 0.f);
+	bool TraceClimbableSurfaces();
+	FHitResult TraceFromEyeHeight(float TraceDistance, float TraceStartOffset = 0.f);
+	bool CanStartClimbing();
+
+	void StartClimbing();
+
+	void StopClimbing();
 
 #pragma endregion
 
-#pragma region ClimbVariables
+#pragma region ClimbCoreVariables
+
+	TArray<FHitResult> ClimableSurfacesTracedResults;
+
+#pragma endregion 
+
+#pragma region ClimbBPVariables
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Movement: Climbing", meta = (AllowPrivateAccess = "true"))
 	TArray<TEnumAsByte<EObjectTypeQuery> > ClimableSurfaceTraceTypes;
@@ -46,5 +66,7 @@ private:
 	float ClimbCapsuleTraceHalfHeight = 72.f;
 #pragma endregion
 
-
+public:
+	void ToggleClimbing(bool bEnableClimb);
+	bool IsClimbing() const;
 };

@@ -132,7 +132,16 @@ void AGP4_P01_ClimbingCharacter::Look(const FInputActionValue& Value)
 
 void AGP4_P01_ClimbingCharacter::OnClimbActionStarted(const FInputActionValue& Value)
 {
-	Debug::Print(TEXT("Debug Working"));
+	if (!CustomMovementComponent) return;
+
+	if(!CustomMovementComponent->IsClimbing())
+	{
+		CustomMovementComponent->ToggleClimbing(true);
+	}
+	else
+	{
+		CustomMovementComponent->ToggleClimbing(false);
+	}
 }
 
 
