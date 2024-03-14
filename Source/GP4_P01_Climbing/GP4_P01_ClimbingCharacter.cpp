@@ -96,8 +96,23 @@ void AGP4_P01_ClimbingCharacter::SetupPlayerInputComponent(class UInputComponent
 
 void AGP4_P01_ClimbingCharacter::Move(const FInputActionValue& Value)
 {
+	if (!CustomMovementComponent) return;
+
+	if (CustomMovementComponent->IsClimbing())
+	{
+		HandleClimbMovementInput(Value);
+	}
+	else
+	{
+		HandleGroundMovementInput(Value);
+	}
+	
+}
+
+void AGP4_P01_ClimbingCharacter::HandleGroundMovementInput(const FInputActionValue& Value)
+{
 	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
+	const FVector2D MovementVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
 	{
@@ -107,7 +122,7 @@ void AGP4_P01_ClimbingCharacter::Move(const FInputActionValue& Value)
 
 		// get forward vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	
+
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
@@ -117,6 +132,25 @@ void AGP4_P01_ClimbingCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
+void AGP4_P01_ClimbingCharacter::HandleClimbMovementInput(const FInputActionValue& Value)
+{
+	// input is a Vector2D
+	const FVector2D MovementVector = Value.Get<FVector2D>();
+
+	const FVector ForwardDirection = FVector::CrossProduct(
+		-CustomMovementComponent->GetClimbableSurfaceNormal(),
+		GetActorRightVector()
+	);
+
+	const FVector RightDirection = FVector::CrossProduct(
+		-CustomMovementComponent->GetClimbableSurfaceNormal(),
+		-GetActorUpVector()
+	);
+
+	// add movement 
+	AddMovementInput(ForwardDirection, MovementVector.Y);
+	AddMovementInput(RightDirection, MovementVector.X);
+}
 void AGP4_P01_ClimbingCharacter::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
